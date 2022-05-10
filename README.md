@@ -83,7 +83,7 @@ Server for hosting company/user websites.
 SSH and SFTP -access is allowed for admin users for setup and configuration.  
 SSH and SFTP -access is allowed for regular users for personal website configuring. Access is restricted to user home directory.    
 
-Naming: Wxxxx
+Naming: Sxxxx
 
 #### Technical Specifications
 

@@ -14,15 +14,15 @@ This document will go through the step by step guide for installation of the mod
 
 ## TLDR (I just want to try it out)
 
-1. Install two virtual computers running Debian based Linux on the same network  
-    - Tested on Debian 11 Bullseye  
-2. Install salt-master on one and open firewall ports if necessary  
+1. Install three virtual computers running Debian based Linux on the same network  
+    - Tested on 2xDebian 11 Bullseye, 1xUbuntu Server 22.04 (minimal) 
+2. Install salt-master on one Debian and open firewall ports if necessary  
     - https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html  
-3. Install salt-minion on the other, define master and id in /etc/salt/minion -file and restart salt-minion.service  
-4. Accept the minions key on the master: `sudo salt-key -A`   
+3. Install salt-minion on the others, define master and id in /etc/salt/minion -file and restart salt-minion.service  
+4. Accept the minions' keys on the master: `sudo salt-key -A`   
 5. Clone this repository and copy the files in directory 'module' to your salt file root.  
     - `sudo cp -r PATH_TO_PROJECT/final-module-linux-conf-mgmt2022/module/* /srv/salt/`  
-6. Run the only state currently implemented: `sudo salt '*' state.apply user-packages`  
+6. Run the only state currently implemented: `sudo salt 'U0001' state.apply user-packages`  
 
 ## Devices and user accounts for demonstration 
 
@@ -61,9 +61,9 @@ Naming: U0001
 
 ## Webserver 
 
-Naming: W0001
+Naming: S0001
 
-- Operating system: Ubuntu Server 22.04  
+- Operating system: Ubuntu Server 22.04 (minimal) 
 - Desktop Environment: No  
 - Memory: 2gb (Enough for the purpose of this test)  
 - Disk Space: 15gb  
@@ -138,6 +138,12 @@ $ sudo salt 'U0001' test.ping
 U0001:
     True
 ```
+
+## Web Server setup
+
+During installation the admin user performing the installation was created.  
+
+Initial setup follows the same path as User Workstation with the exception that one Administrator account has already been created during installation and nano (or your favorite editor) has to be manually installed before editing the files.
 
 ## First state
 
