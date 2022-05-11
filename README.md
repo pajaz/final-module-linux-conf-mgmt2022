@@ -1,4 +1,4 @@
-# Salt-stack managed multi-user and server environment
+# Saltstack managed multi-user and -server environment
 
 Project created by: Mikko Pajunen (pajaz)  
 
