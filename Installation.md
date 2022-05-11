@@ -15,7 +15,7 @@ This document will go through the step by step guide for installation of the mod
 ## TLDR (I just want to try it out)
 
 1. Install three virtual computers running Debian based Linux on the same network  
-    - Tested on 2xDebian 11 Bullseye, 1xUbuntu Server 22.04 (minimal) 
+    - Tested on 2xDebian 11 Bullseye, 1xUbuntu Server 22.04   
 2. Install salt-master on one Debian and open firewall ports if necessary  
     - https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html  
 3. Install salt-minion on the others, define master and id in /etc/salt/minion -file and restart salt-minion.service  
