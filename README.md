@@ -1,32 +1,32 @@
-# Linux Configuration Management Final (Description)
-
-Part of Linux Configuration Management ICT4TN022-3015 course of Haaga-Helia University of Applied Sciences held by Tero Karvinen.  
-
-Course page: https://terokarvinen.com/2021/configuration-management-systems-2022-spring/  
+# Salt-stack managed multi-user and server environment
 
 Project created by: Mikko Pajunen (pajaz)  
-Current stage: Alpha
 
-<img src="Screenshots/stageA22-05-10.png">
-
-## Project Goal
-
-To install a multi-user environment containing personal computers and a server for serving company and (static) user websites. Utilizing Saltstack centralized administration.
+Salt configuration for a multi-user environment containing personal computers and a server for serving company and (static) user websites.
 
 The implementation will be simulated on VirtualBox virtual computers on a single Linux Debian 11 host. 
-  
-Installation/Progress [Here](Installation.md)  
-  
+
 ## License 
 
 The project is published under GPL-2.0-only (GNU General Public License v2.0).  
 https://opensource.org/licenses/gpl-2.0.php   
-  
-  
+
+## Development
+
+Current stage: Alpha
+Install Guide/Progress Report [Here](Installation.md)
+
+<img src="Screenshots/stageA22-05-10.png"> 
+
+## Additional Information
+
+Part of Linux Configuration Management ICT4TN022-3015 course of Haaga-Helia University of Applied Sciences held by Tero Karvinen.  
+
+Course page: https://terokarvinen.com/2021/configuration-management-systems-2022-spring/  
   
 # Project details
 
-This section will provide the details according to which the devices and user accounts will be set up.  
+This section will provide details of device and user management.  
 
 ## Webserver needs
 
