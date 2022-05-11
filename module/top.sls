@@ -1,7 +1,6 @@
 base:
   '*':
     - sshd
-    - ufw
   'U*':
     - user-packages
     - firefox
