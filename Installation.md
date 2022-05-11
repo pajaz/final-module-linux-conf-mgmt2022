@@ -287,13 +287,24 @@ sshd:
   service.running:
     - watch:
       - file: /etc/ssh/sshd_config
-$ sudo salt 'U*' state.apply sshd
+$ sudo salt '*' state.apply sshd
 ```
 State was run succesfully.  
 
 The Jinja code uses regex_match function to see if the minions ID extracted by grains\[id] starts with a specific letter and applies the correct configuration.  
 
 Finally I added the sshd to the [top.sls](module/top.sls) file under base '*' because it can be run for all current minions safely.  
+
+top.sls file at this point:  
+```
+base:
+  '*':
+    - sshd
+  'U*':
+    - user-packages
+  'S*':
+    - webserver-packages
+```
 
 ## Progress
 
