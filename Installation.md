@@ -4,7 +4,7 @@ Part of Linux Configuration Management ICT4TN022-3015 course of Haaga-Helia Univ
 
 Course page: https://terokarvinen.com/2021/configuration-management-systems-2022-spring/  
 
-Created by: Mikko Pajunen (pajaz)
+Created by: Mikko Pajunen (pajaz)  
 Current stage: Alpha
 
 This project is published under GPL-2.0-only (GNU General Public License v2.0).  
@@ -22,10 +22,9 @@ This document will go through the step by step guide for installation of the mod
 4. Accept the minions' keys on the master: `sudo salt-key -A`   
 5. Clone this repository and copy the files in directory 'module' to your salt file root.  
     - `sudo cp -r PATH_TO_PROJECT/final-module-linux-conf-mgmt2022/module/* /srv/salt/`  
-6. Run the highstate currently implemented: 
-```
-sudo salt '*' state.apply
-```
+6. Run the highstate currently implemented: `sudo salt '*' state.apply`
+
+Module files [Here](module/)
 
 ## Devices and user accounts for demonstration 
 
@@ -292,7 +291,7 @@ $ sudo salt 'U*' state.apply sshd
 ```
 State was run succesfully.  
 
-The Jinja code uses regex_match function to see if the minions ID gotten with grains\[id] starts with a specific letter and applies the correct configuration.  
+The Jinja code uses regex_match function to see if the minions ID extracted by grains\[id] starts with a specific letter and applies the correct configuration.  
 
 Finally I added the sshd to the [top.sls](module/top.sls) file under base '*' because it can be run for all current minions safely.  
 
