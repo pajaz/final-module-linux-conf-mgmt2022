@@ -235,7 +235,7 @@ $ sudo salt 'U*' state.apply sshd
 ```
 State was run succesfully
     
-I copied the default configuration file /etc/ssh/sshd_config to /srv/salt/sshd, renamed it and added it to managed files: 
+I copied the default configuration file /etc/ssh/sshd_config to /srv/salt/sshd, renamed it to [user_sshd_config](module/sshd/user_sshd_config) and added it to managed files: 
 ```
 $ sudo cp /etc/ssh/sshd_config /srv/salt/sshd
 $ pwd
@@ -270,7 +270,7 @@ $ sudo salt 'U*' state.apply sshd
 ```
 State was run succesfully.  
 
-I made a similar configuration file for the web-server called webserver_sshd_config and edited the init.sls file to identify the minion and use the correct configuration file accordingly:
+I made an other configuration file for the web-server called [webserver_sshd_config](module/sshd/webserver_sshd_config) and edited the init.sls file to identify the minion and use the correct configuration file accordingly:
 ```
 $ sudo micro init.sls 
 $ cat init.sls 
@@ -307,8 +307,7 @@ base:
 ```
 
 ## Progress
-
-So everything works fine for now.  
+  
 Applications needing their own states:  
 1. ufw for setting up the ports for ssh connections  
 2. sshd to only allow ssh connections from admin users and/or C0001 (master)  
