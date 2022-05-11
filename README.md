@@ -13,7 +13,7 @@ https://opensource.org/licenses/gpl-2.0.php
 
 ## Development
 
-Current stage: Alpha
+Current stage: Alpha  
 Install Guide/Progress Report [Here](Installation.md)
 
 <img src="Screenshots/stageA22-05-10.png"> 
