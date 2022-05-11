@@ -15,7 +15,7 @@ To install a multi-user environment containing personal computers and a server f
 
 The implementation will be simulated on VirtualBox virtual computers on a single Linux Debian 11 host. 
   
-Installation guide [Here](Installation.md)  
+Installation/Progress [Here](Installation.md)  
   
 ## License 
 
@@ -64,7 +64,7 @@ Naming: Cxxxx
 - Desktop Environment: Gnome  
 - Memory: 2gb (Enough for the purpose of this test)  
 - Disk Space: 15gb (Dynamic)  
-- Network adapter: Bridged Adapter 
+- Network adapter: NAT, Host-only Adapter
 
 #### Packages  
 
@@ -91,7 +91,7 @@ Naming: Sxxxx
 - Desktop Environment: No  
 - Memory: 2gb (Enough for the purpose of this test)  
 - Disk Space: 15gb  
-- Network adapter: Bridged Adapter  
+- Network adapter: NAT, Host-only Adapter 
 
 #### Packages  
 
@@ -116,7 +116,7 @@ Naming: Uxxxx
 - Desktop Environment: Gnome  
 - Memory: 2gb (Enough for the purpose of this test)  
 - Disk Space: 15gb (Dynamic)  
-- Network adapter: Bridged Adapter  
+- Network adapter: NAT, Host-only Adapter 
 
 #### Packages  
 
