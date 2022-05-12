@@ -26,6 +26,29 @@ This document will go through the step by step guide for installation of the mod
 
 Module files [Here](module/)
 
+## Progress
+
+### Done
+
+- Manual Installation stages of User Workstation and Web Server
+- Default package states for User Workstation and Web Server
+- SSHD configuration for User Workstation and Web Server
+  - SSH access for UW set to only allow connections from Admin console C0001, tested
+  - SSH access for WS set to allow connections from anywhere and root access from C0001, tested
+- Browser configuration for User Workstation
+  - Blocked installing extensions on Firefox and Chromium
+  - Forced installation of uBlock on Firefox and Chromium
+
+### To-Do
+
+- ufw or ip-tables configuration for all devices (leaning towards ip-tables)
+- filezilla to set up sftp from User Workstations to Web Server
+- Web Server Apache2 configuration
+  - Default index.html has to be changed
+  - User websites enabled  
+- Automated user creation / deletion for all devices
+- Scheduled updates for all devices
+
 ## Devices and user accounts for demonstration 
 
 Devices:  
@@ -306,14 +329,92 @@ base:
     - webserver-packages
 ```
 
-## Progress
+## Browser States (Firefox-esr and Chromium)
+
+Browsers on User workstations are Firefox and Chromium.  
+Both browsers will be centrally managed.   
+Users will not be able to install extensions to browsers and uBlock adblocker extension will be installed automatically.  
+
+Created the state for Firefox:
+```
+$ pwd
+/srv/salt
+$ sudo mkdir firefox
+$ sudo cd firefox
+$ sudo micro firefox-default-policies.json
+$ cat firefox-default-policies.json
+{
+	"policies": {
+  		"BlockAboutConfig": true,
+  		"ExtensionSettings": {
+  			"*": {
+  				"install_sources": ["about:addons", "https://addons.mozilla.org"],
+  				"installation_mode": "blocked",
+  				"allowed_types": ["extension"]
+  			},
+  			"uBlock0@raymondhill.net": {
+  				"installation_mode": "force_installed",
+  			 	"install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+  			}
+  		}
+  	}
+}
+$ sudo micro init.sls
+$ cat init.sls
+firefox-esr:
+  pkg.installed
+/etc/firefox/policies/policies.json:
+  file.managed:
+    - source: salt://firefox/firefox-default-policies.json
+    - makedirs: True
+$ sudo salt 'U0001' state.apply firefox
+```
+State ran succesfully. User computer's FireFox has uBlock installed, it can't be removed and new extensions are blocked:
+
+<img src="Screenshots/firefoxPolicyOk.png">
+
+Created a very similar state for Chromium:
+```
+$ pwd
+/srv/salt
+$ sudo mkdir chromium
+$ sudo cd chromium
+$ sudo micro chromium-default-policies.json
+$ cat chromium-default-policies.json
+{
+  "ExtensionSettings": {
+    "*": {
+      "installation_mode": "blocked"
+    },
+    "cjpalhdlnbpafiamejdnhcphjbkeiagm": {
+    	"installation_mode": "force_installed",
+    	"update_url":
+    	  "https://clients2.google.com/service/update2/crx"
+    }
+  }
+}
+$ sudo micro init.sls
+$ cat init.sls
+chromium:
+  pkg.installed
+/etc/chromium/policies/managed/policies.json:
+  file.managed:
+    - source: salt://chromium/chromium-default-policies.json
+    - makedirs: True
+$ sudo salt 'U0001' state.apply chromium
+```
+State ran succesfully. Screenshot from the user workstation:
+
+<img src="Screenshots/chromiumPolicyOk.png">
+
+Browser are now configured correctly.
+
+If you want to know more about the configuration options, look into these links:  
+https://support.google.com/chrome/a/answer/7517525#zippy=%2Cset-installation-policies-automatically-install-force-install-allow-or-block  
+  - The default path for Chromium differs from Chrome's path. Correct path is /etc/chromium/policies/managed/. The folder has to be created manually.
+ 
+https://github.com/mozilla/policy-templates  
+
   
-Applications needing their own states:  
-1. ufw for setting up the ports for ssh connections  
-2. sshd to only allow ssh connections from admin users and/or C0001 (master)  
-    - ssh access for U* set to only allow connections from Admin console C0001, tested
-    - ssh access for S* set to allow connections from anywhere and root access from C0001, tested
-3. filezilla to set up sftp  
-4. firefox-esr and chromium to disallow users from installing their own browser plugins and forcing a uBlock installation.  
 
 
