@@ -15,10 +15,15 @@ This document will go through the step by step guide for installation of the mod
 2. Install salt-master on one Debian and open firewall ports if necessary  
     - https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html  
 3. Install salt-minion on the others, define master and id in /etc/salt/minion -file and restart salt-minion.service  
+    - Define firewall settings manually if needed. Ports that need to be open:
+      - User Workstation: 22  
+      - Web Server: 22, 80
 4. Accept the minions' keys on the master: `sudo salt-key -A`   
 5. Clone this repository and copy the files in directory 'module' to your salt file root.  
     - `sudo cp -r PATH_TO_PROJECT/final-module-linux-conf-mgmt2022/module/* /srv/`  
 6. Run the highstate currently implemented: `sudo salt '*' state.apply`
+7. Adjust user home folder permissions manually for each user on the Web Server:
+  - `$ chmod ugo+x $HOME` ($HOME = /home/user)
 
 Module files [Here](module/)
 
@@ -619,4 +624,3 @@ $ chmod ugo+x $HOME $HOME/public_html/; chmod ug+r  $HOME/public_html/index.html
 <img src="Screenshots/apacheUsersiteWorks.png">
 
 Next I have to figure out how to set these permissions automatically.  
-Probably set a UMASK configuration.  
