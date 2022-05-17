@@ -21,7 +21,7 @@ This document will go through the step by step guide for installation of the mod
 3. Install salt-minion on the others, define master and id in /etc/salt/minion -file and restart salt-minion.service  
 4. Accept the minions' keys on the master: `sudo salt-key -A`   
 5. Clone this repository and copy the files in directory 'module' to your salt file root.  
-    - `sudo cp -r PATH_TO_PROJECT/final-module-linux-conf-mgmt2022/module/* /srv/salt/`  
+    - `sudo cp -r PATH_TO_PROJECT/final-module-linux-conf-mgmt2022/module/* /srv/`  
 6. Run the highstate currently implemented: `sudo salt '*' state.apply`
 
 Module files [Here](module/)
@@ -43,12 +43,13 @@ Module files [Here](module/)
 
 ### To-Do
 
-- ufw or ip-tables configuration for all devices (leaning towards ip-tables)
-- Filezilla to work with SSH-keys rather than pw
+- ufw configuration for all devices
+- Filezilla to work with private-public key authentication rather than password
 - Web Server Apache2 configuration
   - Default index.html has to be changed
   - User websites enabled  
 - Automated user creation for User Workstations
+- 
 - Scheduled updates for all devices
 
 ## Devices and user accounts for demonstration 
@@ -552,6 +553,4 @@ base:
     - sshd
     - users
 ```
-
-
 
