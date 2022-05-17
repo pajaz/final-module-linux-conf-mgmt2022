@@ -28,7 +28,7 @@ Module files [Here](module/)
 
 ## Progress
 
-### Done
+### Implemented
 
 - Manual Installation stages of User Workstation and Web Server
 - Default package states for User Workstation and Web Server
@@ -38,15 +38,17 @@ Module files [Here](module/)
 - Browser configuration for User Workstation
   - Blocked installing extensions on Firefox and Chromium
   - Forced installation of uBlock on Firefox and Chromium
+- Admin/User creation for web-server and admin creation for workstations
+- Filezilla SFTP configuration with Interactive settings on User Workstations
 
 ### To-Do
 
 - ufw or ip-tables configuration for all devices (leaning towards ip-tables)
-- filezilla to set up sftp from User Workstations to Web Server
+- Filezilla to work with SSH-keys rather than pw
 - Web Server Apache2 configuration
   - Default index.html has to be changed
   - User websites enabled  
-- Automated user creation / deletion for all devices
+- Automated user creation for User Workstations
 - Scheduled updates for all devices
 
 ## Devices and user accounts for demonstration 
@@ -415,6 +417,141 @@ https://support.google.com/chrome/a/answer/7517525#zippy=%2Cset-installation-pol
  
 https://github.com/mozilla/policy-templates  
 
-  
+## Filezilla (SFTP)
+
+Goal is for the users to be able move files to their home directory on the webserver (S0001) utilizing SFTP (Secure File Transfer Protocol) running over SSH.  
+
+Haven't set up Filezilla before so configured one computer manually first so I chose File > Site Manager... and New Site and set the following settings:
+
+<img src="Screenshots/filezillaSiteManager1.png">
+
+Then clicked connect and typed in my user name and password for S0001, created a test file to my home directory and moved it to the webserver:
+
+<img src="Screenshots/filezillaTest1.png">
+
+Filezilla configuration files are located in /home/username/.config/filezilla -directory. To be more exact the files needed for setting it up are filezilla.xml and sitemanager.xml. Unfortunately the files are in the user's home folder and and I couldn't find a way to enforce system-wide settings so I'll manage the files through /etc/skel for now to get the correct settings for new users.  
+```
+$ pwd
+/srv/salt/filezilla
+$ ls
+default-filezilla.xml  default-sitemanager.xml  init.sls
+$ cat init.sls 
+filezilla:
+  pkg.installed
+
+/etc/skel/.config/filezilla/filezilla.xml:
+  file.managed:
+    - source: salt://filezilla/default-filezilla.xml
+    - makedirs: True
+
+/etc/skel/.config/filezilla/sitemanager.xml:
+  file.managed:
+    - source: salt://filezilla/default-sitemanager.xml
+    - makedirs: True
+```
+
+The contents of the default -files werecopied from the manual installation computer. That explains choosing the Interactive setting in the Site Manager of Filezilla as it doesn't have any hard-coded paths or usernames and passwords.  
+
+At this point I deleted the user xzadminal from U0001 (deluser xzadminal && rm -r /home/xzadminal), ran the state `sudo salt 'U* state.apply filezilla' succesfully. Created ja new user and tried out Filezilla. Looks to work properly. 
+
+I finally edited the top.sls file:
+```
+$ cat /srv/salt/top.sls 
+base:
+  'U*':
+    - user-packages
+    - filezilla
+    - firefox
+  'S*':
+    - webserver-packages
+  '*':
+    - sshd
+```
+
+Because Filezilla's state manages files that are created for all new users, the state has to be pretty higher than user creation (will be implented on the next stage) in the top.sls file.  
+
+
+## User Management
+
+User account management will be automated with following presets:  
+- Webserver will have all users present, admin users will have sudo rights.  
+- User workstations will have admin accounts with sudo present. The designated user's account will be created manually.   
+  - Debian 11 installation forces the creation of a user account. Create one and just remove it immediately with root as the management might get messy with manually created accounts.  
+- Administrative unit (salt-master) will have admin accounts present but will be configured manually for now.  
+
+Started out by creating a pillar for the users, with separate .sls files for admins and regular users:
+```
+$ cat /srv/pillar/users/users.sls 
+users:
+  workewi:
+    fullname: Willy Worker
+    uid: 2001
+    gid: 2001
+  smithjo:
+    fullname: John Smith
+    uid: 2002
+    gid: 2002 
+$ cat /srv/pillar/users/admins.sls 
+users:
+  xzadminal:
+    fullname: Ally Administrator
+    uid: 1001
+    gid: 1001
+    groups:
+      - sudo
+$ cat /srv/pillar/top.sls 
+base:
+  'S*':
+    - users.admins
+    - users.users
+  'U*':
+    - users.admins
+```
+
+Next I created the actual salt state that reads from the pillar:
+```
+$ cat /srv/salt/users/init.sls 
+{% for username, data in pillar.get('users', {}).items() %}
+{{ username }}:
+
+  group:
+    - present
+    - name: {{ username }}
+    - gid: {{ data.get('gid', '') }}
+    
+  user:
+    - present
+    - fullname: {{ data.get('fullname', '') }}
+    - shell: /bin/bash
+    - name: {{ username }}
+    - uid: {{ data.get('uid', '') }}
+    - gid: {{ data.get('gid', '') }}
+    {% if 'groups' in data %}
+    - groups:
+      {% for group in data.get('groups', []) %}
+      - {{ group }}
+      {% endfor %} 
+    {% endif %}  
+{% endfor %}
+```
+
+And ran the state to all computers with `$ sudo salt '*' state.apply users`. State was run succesfully.  
+Also tested the idempotency of the state by deleting (deluser username) the admin account from U0001 and workewi from S0001. The state resolved the issue and recreated the groups and accounts.  
+
+Edited the /srv/salt/top.sls file:
+```
+$ cat /srv/salt/top.sls 
+base:
+  'U*':
+    - user-packages
+    - filezilla
+    - firefox
+  'S*':
+    - webserver-packages
+  '*':
+    - sshd
+    - users
+```
+
 
 
