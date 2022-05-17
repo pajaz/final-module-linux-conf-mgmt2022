@@ -1,9 +1,5 @@
 # Linux Configuration Management Final (Installation guide)
 
-Part of Linux Configuration Management ICT4TN022-3015 course of Haaga-Helia University of Applied Sciences held by Tero Karvinen. Course is in Finnish.  
-
-Course page: https://terokarvinen.com/2021/configuration-management-systems-2022-spring/  
-
 Created by: Mikko Pajunen (pajaz)  
 Current stage: Alpha
 
@@ -14,7 +10,7 @@ This document will go through the step by step guide for installation of the mod
 
 ## TLDR (I just want to try it out)
 
-1. Install three virtual computers running Debian based Linux on the same network  
+1. Install three or four virtual computers running Debian based Linux on the same network  
     - Tested on 2xDebian 11 Bullseye, 1xUbuntu Server 22.04   
 2. Install salt-master on one Debian and open firewall ports if necessary  
     - https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html  
@@ -26,6 +22,12 @@ This document will go through the step by step guide for installation of the mod
 
 Module files [Here](module/)
 
+## Additional Information
+
+Part of Linux Configuration Management ICT4TN022-3015 course of Haaga-Helia University of Applied Sciences held by Tero Karvinen. Course is in Finnish.  
+
+Course page: https://terokarvinen.com/2021/configuration-management-systems-2022-spring/  
+
 ## Progress
 
 ### Implemented
@@ -33,37 +35,38 @@ Module files [Here](module/)
 - Manual Installation stages of User Workstation and Web Server
 - Default package states for User Workstation and Web Server
 - SSHD configuration for User Workstation and Web Server
-  - SSH access for UW set to only allow connections from Admin console C0001, tested
-  - SSH access for WS set to allow connections from anywhere and root access from C0001, tested
+  - SSH access for UW set to only allow connections from Admin console C0001  
+  - SSH access for WS set to allow connections from anywhere and root access from C0001  
 - Browser configuration for User Workstation
   - Blocked installing extensions on Firefox and Chromium
   - Forced installation of uBlock on Firefox and Chromium
-- Admin/User creation for web-server and admin creation for workstations
+- States for admin/user creation for web-server and admin creation for workstations
 - Filezilla SFTP configuration with Interactive settings on User Workstations
+- ufw manual installation (possibly no automated installation coming)
+- Apache2 default index changed and user sites enabled
+  - User sites need extra permission setting manually as user home folder is lacking execute rights from other by default.  
 
 ### To-Do
 
-- ufw configuration for all devices
 - Filezilla to work with private-public key authentication rather than password
 - Web Server Apache2 configuration
-  - Default index.html has to be changed
-  - User websites enabled  
+  - User site permission problem. Default \$HOME permissions need to be configured correctly. 
 - Automated user creation for User Workstations
-- 
-- Scheduled updates for all devices
+  - Has to be done manually as of now
 
 ## Devices and user accounts for demonstration 
 
 Devices:  
 1 Administrative unit    
 1 Web server  
-1 User workstation  
+2 User workstations  
 
 Users:  
 root, All systems will have root access enabled but admin users will have sudo -rights.  
 xzadminal, Ally Administrator, admin (sudo on all devices)  
 workewi, Willy Worker, user (regular user on personal workstation and web server)  
-webctrl, user (regular user on the web-server in charge of the company website)  
+smithjo, John Smith, user (regulat user on personal workstation and web server)   
+webctrl, user (regular user on the web-server in charge of the company website)   
 
 Systems will run as a Virtual Box instances for the purposes of the demonstration.  
 
@@ -554,3 +557,66 @@ base:
     - users
 ```
 
+## ufw
+
+For now ufw will be set up manually during installation of a computer/server due to unresolved problems. Often times when installing ufw with salt, minion is out of reach of master for a while (5-15 minutes) or until reboot.  
+
+```
+$ sudo apt-get install ufw
+$ sudo ufw enable
+$ sudo ufw allow 22
+$ sudo reboot
+```
+
+On the webserver you add to allow access to websites:
+```
+$ sudo ufw allow 80
+```
+
+## Apache 2 Userdirs
+
+Enables user websites at host/~USERNAME   
+
+Settings done according to these instructions: https://terokarvinen.com//2018/apache-user-homepages-automatically-salt-package-file-service-example/
+
+Userdir enabling:
+```
+$ cat /srv/salt/apache2/init.sls 
+apache2:
+  pkg.installed
+ 
+/var/www/html/index.html:
+  file.managed:
+    - source: salt://apache2/default-index.html
+   
+/etc/apache2/mods-enabled/userdir.conf:
+  file.symlink:
+    - target: ../mods-available/userdir.conf
+   
+/etc/apache2/mods-enabled/userdir.load:
+  file.symlink:
+    - target: ../mods-available/userdir.load
+   
+apache2service:
+  service.running:
+    - name: apache2
+    - watch:
+      - file: /etc/apache2/mods-enabled/userdir.conf
+      - file: /etc/apache2/mods-enabled/userdir.load
+
+/etc/skel/public_html/index.html:
+  file.managed:
+    - source: salt://apache2/user-default-index.html
+    - mode: '751'
+    - makedirs: True
+```
+
+Deleted use xzadminal from U0001, ran the state, ran the users state and set a new password to xzadminal and tested the site. Unfortunately got a Forbidden error so had to adjust the permissions for the whole path:
+```
+$ chmod ugo+x $HOME $HOME/public_html/; chmod ug+r  $HOME/public_html/index.html
+```
+
+<img src="Screenshots/apacheUsersiteWorks.png">
+
+Next I have to figure out how to set these permissions automatically.  
+Probably set a UMASK configuration.  
