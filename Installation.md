@@ -48,16 +48,16 @@ Course page: https://terokarvinen.com/2021/configuration-management-systems-2022
   - Blocked installing extensions on Firefox and Chromium
   - Forced installation of uBlock on Firefox and Chromium
 - States for admin/user creation for web-server and admin creation for workstations
-- Filezilla SFTP configuration with Interactive settings on User Workstations
+- Filezilla SFTP configuration with Interactive (always ask for username and password) settings on User Workstations
 - ufw manual installation (possibly no automated installation coming)
 - Apache2 default index changed and user sites enabled 
 
 ### To-Do
 
 - Filezilla to work with private-public key authentication rather than password
-- Web Server Apache2 configuration
-- Automated user creation for User Workstations
+- Automated user creation for User Workstations.  
   - Has to be done manually as of now
+- Write down demonstration of salt shadow -module for password management.  
 
 ## Devices and user accounts for demonstration 
 
@@ -648,3 +648,77 @@ Deleted all the users and home-directories except admin from the webserver S0001
 
 Moving the default front-page location from /var/www/ to /home/webctrl/www/ to not require sudo-rights for editing.  
 
+Simple guide for this:  
+https://www.digitalocean.com/community/tutorials/how-to-move-an-apache-web-root-to-a-new-location-on-ubuntu-16-04 (Also works on Debian 11)  
+
+On the web-server the file to change is the following:
+```
+/etc/apache2/sites-enabled/000-default.conf
+## Replace this
+DocumentRoot /home/webctrl/www/html
+## Add these
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /home/webctrl/www/html/>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Require all granted
+	</Directory>
+```
+
+And the apache2 state looked like this after the changes:
+```
+$ cat /srv/salt/apache2/init.sls 
+apache2:
+  pkg.installed
+   
+/etc/apache2/mods-enabled/userdir.conf:
+  file.symlink:
+    - target: ../mods-available/userdir.conf
+   
+/etc/apache2/mods-enabled/userdir.load:
+  file.symlink:
+    - target: ../mods-available/userdir.load
+
+# Added the new configuration file
+/etc/apache2/sites-enabled/000-default.conf:
+  file.managed:
+    - source: salt://apache2/000-default.conf
+
+# Changed the path, added makedirs to create parents and set permissions correct
+/home/webctrl/www/html/index.html:
+  file.managed:
+    - source: salt://apache2/default-index.html
+    - makedirs: True
+    - mode: '754'
+
+apache2service:
+  service.running:
+    - name: apache2
+    - watch:
+      - file: /etc/apache2/mods-enabled/userdir.conf
+      - file: /etc/apache2/mods-enabled/userdir.load
+# Added the conf-file to be watched
+      - file: /etc/apache2/sites-enabled/000-default.conf
+
+/etc/skel/public_html/index.html:
+  file.managed:
+    - source: salt://apache2/user-default-index.html
+    - mode: '754'
+    - makedirs: True
+```
+
+And afer running he states, it works:
+
+<img src="Screenshots/apacheMainMoved.png">
+
+Made another user deletion and apache uninstallation on the webserver and ran the states:
+```
+$ sudo salt 'S*' state.apply
+Succeeded: 23 (changed=15)
+Failed:     0
+```
+
+Everything works, including the websites.  
