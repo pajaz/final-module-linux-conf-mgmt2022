@@ -5,6 +5,7 @@ base:
     - firefox
   'S*':
     - webserver-packages
+    - apache2
   '*':
     - sshd
     - users
