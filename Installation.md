@@ -11,7 +11,8 @@ This document will go through the step by step guide for installation of the mod
 ## TLDR (I just want to try it out)
 
 1. Install three or four virtual computers running Debian based Linux on the same network  
-    - Tested on 2xDebian 11 Bullseye, 1xUbuntu Server 22.04   
+    - Tested on 2xDebian 11 Bullseye, 1xUbuntu Server 22.04.   
+    - During installation, enable root password and if prompted to make a user, make one and after installation, login with root and delete the created user.  
 2. Install salt-master on one Debian and open firewall ports if necessary  
     - https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html  
 3. Install salt-minion on the others, define master and id in /etc/salt/minion -file and restart salt-minion.service  
@@ -24,6 +25,7 @@ This document will go through the step by step guide for installation of the mod
 6. Run the highstate currently implemented: `sudo salt '*' state.apply`
 7. Adjust user home folder permissions manually for each user on the Web Server:
   - `$ chmod ugo+x $HOME` ($HOME = /home/user)
+8. Set up passwords for you users and try it out.
 
 Module files [Here](module/)
 
@@ -48,14 +50,12 @@ Course page: https://terokarvinen.com/2021/configuration-management-systems-2022
 - States for admin/user creation for web-server and admin creation for workstations
 - Filezilla SFTP configuration with Interactive settings on User Workstations
 - ufw manual installation (possibly no automated installation coming)
-- Apache2 default index changed and user sites enabled
-  - User sites need extra permission setting manually as user home folder is lacking execute rights from other by default.  
+- Apache2 default index changed and user sites enabled 
 
 ### To-Do
 
 - Filezilla to work with private-public key authentication rather than password
 - Web Server Apache2 configuration
-  - User site permission problem. Default \$HOME permissions need to be configured correctly. 
 - Automated user creation for User Workstations
   - Has to be done manually as of now
 
@@ -477,7 +477,7 @@ base:
     - sshd
 ```
 
-Because Filezilla's state manages files that are created for all new users, the state has to be pretty higher than user creation (will be implented on the next stage) in the top.sls file.  
+Because Filezilla's state manages files that are created for all new users, the state has to be higher than user creation (will be implented on the next stage) in the top.sls file.  
 
 
 ## User Management
@@ -485,7 +485,7 @@ Because Filezilla's state manages files that are created for all new users, the 
 User account management will be automated with following presets:  
 - Webserver will have all users present, admin users will have sudo rights.  
 - User workstations will have admin accounts with sudo present. The designated user's account will be created manually.   
-  - Debian 11 installation forces the creation of a user account. Create one and just remove it immediately with root as the management might get messy with manually created accounts.  
+  - Debian 11 installation forces the creation of a user account. Create one and just remove it immediately with root as the management might get messy with manually created admin accounts.  
 - Administrative unit (salt-master) will have admin accounts present but will be configured manually for now.  
 
 Started out by creating a pillar for the users, with separate .sls files for admins and regular users:
@@ -623,4 +623,28 @@ $ chmod ugo+x $HOME $HOME/public_html/; chmod ug+r  $HOME/public_html/index.html
 
 <img src="Screenshots/apacheUsersiteWorks.png">
 
-Next I have to figure out how to set these permissions automatically.  
+Permissions fixed by editing the /etc/skel/public_html/index.html permissions to 754 and user home directories for webserve to "751":
+```
+$ cat /srv/salt/apache2/init.sls
+# Only showing the edited part
+/etc/skel/public_html/index.html:
+  file.managed:
+    - source: salt://apache2/user-default-index.html
+    - mode: '754'
+    - makedirs: True
+$ cat /srv/salt/users/init.sls
+{% if grains['id'] | regex_match('S(.*)') %}
+/home/{{ username }}:
+  file.directory:
+    - mode: 751
+{% endif %}
+```
+
+Deleted all the users and home-directories except admin from the webserver S0001 and ran the state `sudo salt 'S*' state.apply`. Multiple users were created and the public_html/index.html now also has correct permissions.
+
+<img src="Screenshots/apacheUsersitesAll.png">
+
+## Apache 2 Index to Dedicated user
+
+Moving the default front-page location from /var/www/ to /home/webctrl/www/ to not require sudo-rights for editing.  
+
