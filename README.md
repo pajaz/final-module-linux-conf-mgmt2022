@@ -48,7 +48,7 @@ This section will provide details of device and user management.
 This section will list all the server and workstation types, their specifications and default software.  
 
 - Naming model: 1+4  
-    - First letter: Type (A = Administrative user, C = Administration (Control) unit, U = regular user, W = Web-hosting server) 
+    - First letter: Type (C = Administration (Control) unit, U = regular user, W = Web-hosting server) 
     - 4 digit series: Serial number starting from 0001
   
 ### Administration Unit 
@@ -110,6 +110,8 @@ System and software updates will be run once a week on Monday morning at 5:00am.
 
 Naming: Uxxxx 
 
+Administative users will have sudo -rights on their personal computers.  
+
 #### Technical Specifications
 
 - Operating system: Debian 11 Bullseye Linux
@@ -138,10 +140,3 @@ Naming: Uxxxx
 #### Updates
 
 System updates will be run on startup.  
-
-
-### Workstations (admin)
-
-Naming: Axxxx
-
-The basic setup is identical to user workstations but admin users are free to modify the system according to their own needs.  
