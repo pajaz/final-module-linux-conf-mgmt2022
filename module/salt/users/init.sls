@@ -21,4 +21,10 @@
       - {{ group }}
       {% endfor %} 
     {% endif %}  
+{% if grains['id'] | regex_match('S(.*)') %}
+/home/{{ username }}:
+  file.directory:
+    - mode: 751
+{% endif %}
+    
 {% endfor %}

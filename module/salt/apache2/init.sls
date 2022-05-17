@@ -23,5 +23,5 @@ apache2service:
 /etc/skel/public_html/index.html:
   file.managed:
     - source: salt://apache2/user-default-index.html
-    - mode: '751'
+    - mode: '754'
     - makedirs: True
