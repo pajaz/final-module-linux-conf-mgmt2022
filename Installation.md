@@ -12,20 +12,23 @@ This document will go through the step by step guide for installation of the mod
 
 1. Install three or four virtual computers running Debian based Linux on the same network  
     - Tested on 2xDebian 11 Bullseye, 1xUbuntu Server 22.04.   
-    - During installation, enable root password and if prompted to make a user, make one and after installation, login with root and delete the created user.  
+    - During installation, enable root password and if prompted to make a user, make one but delete after installation.    
 2. Install salt-master on one Debian and open firewall ports if necessary  
     - https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html  
+    - Currently the apt-repository version offered for Ubuntu is newer than the one for Debian so a manual salt-installation might be in place for the Debian systems (https://repo.saltproject.io/#debian)
 3. Install salt-minion on the others, define master and id in /etc/salt/minion -file and restart salt-minion.service  
     - Define firewall settings manually if needed. Ports that need to be open:
       - User Workstation: 22  
       - Web Server: 22, 80
 4. Accept the minions' keys on the master: `sudo salt-key -A`   
 5. Clone this repository and copy the files in directory 'module' to your salt file root.  
-    - `sudo cp -r PATH_TO_PROJECT/final-module-linux-conf-mgmt2022/module/* /srv/`  
+    ```
+    $ git clone https://github.com/pajaz/final-module-linux-conf-mgmt2022.git
+    $ cd final-module-linux-conf-mgmt2022/
+    $ sudo cp -r /module/* /srv/
+    ```
 6. Run the highstate currently implemented: `sudo salt '*' state.apply`
-7. Adjust user home folder permissions manually for each user on the Web Server:
-  - `$ chmod ugo+x $HOME` ($HOME = /home/user)
-8. Set up passwords for you users and try it out.
+7. Set up passwords for you users and try it out.
 
 Module files [Here](module/)
 
