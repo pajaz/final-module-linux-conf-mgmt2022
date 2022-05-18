@@ -17,16 +17,18 @@ Current stage: 1.0
 Install Guide/Progress Report [Here](Installation.md)
 
 Current configuration:  
-- User creation for all devices as dictated in /pillar/users/ files
-- Install default software packages for all devices
-- SSH connections on all devices
-
-- Company policies for browsers on user devices 
-- FileZilla configuration for user devices
-
-- Apache2 configuration on the webserver
+- User creation for all devices as dictated in the .sls files in [/pillar/users/](module/pillar/users) and state [users](module/salt/users) 
+- Install default software packages for all devices with states [user-packages](module/salt/user-packages) and [webserver-packages](module/salt/webserver-packages)
+- SSH connections on all devices with state [sshd](module/salt/sshd)  
+    
+- Company policies for browsers on user devices with states [firefox](module/salt/firefox) and [chromium](module/salt/chromium)
+- FileZilla configuration for user devices with state [filezilla](module/salt/filezilla)  
+    
+- Apache2 configuration on the webserver with state [apache2](module/salt/apache2)
     - User pages active
-    - Default page as custom and default page location with service account webctrl (/home/webctrl/www/html/)
+    - Custom index and default page location in service account webctrl (/home/webctrl/www/html/)  
+    
+- Provide a simple python3 script [createhash](module/Scripts/createhash) for creating password hashes and the salt command to make the actual change.  
 
 ## Additional Information
 

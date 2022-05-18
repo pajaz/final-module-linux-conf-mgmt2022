@@ -28,7 +28,7 @@ This document will go through the step by step guide for installation of the mod
     $ sudo cp -r /module/* /srv/
     ```
 6. Run the highstate currently implemented: `sudo salt '*' state.apply`
-7. Set up passwords for you users and try it out.
+7. Set up passwords for you users with the [createhash](Scripts/createhash) script and try it out.
 
 Module files [Here](module/)
 
