@@ -2,7 +2,7 @@
 <FileZilla3 version="3.52.2" platform="*nix">
 	<Servers>
 		<Server>
-			<Host>192.168.56.4</Host>
+			<Host>192.168.59.8</Host>
 			<Port>22</Port>
 			<Protocol>1</Protocol>
 			<Type>0</Type>
