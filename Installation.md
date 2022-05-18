@@ -58,8 +58,6 @@ Course page: https://terokarvinen.com/2021/configuration-management-systems-2022
 ### To-Do
 
 - Filezilla to work with private-public key authentication rather than password
-- Automated user creation for User Workstations.  
-  - Has to be done manually as of now
 - Write down demonstration of salt shadow -module for password management.  
 
 ## Devices and user accounts for demonstration 
@@ -112,6 +110,7 @@ Naming: S0001
 
 I started by booting up the Administration Unit for the first time and running the basic apt-get update and upgrade.  
 Installed the packages defined in the [Description](Description.md), enabled the firewall (ufw) and allowed connections to the computer through port 22 for ssh. 
+
 ```
 $ sudo apt-get update
 $ sudo apt-get upgrade -y
@@ -123,13 +122,19 @@ Rules updated (v6)
 Firewall is active and enabled on system startup
 ```
 
-Salt-Master installation and enabling firewall rules (Firewall rules need to be enabled only on Master (https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html)):
+Instead of using the regular apt-repository version this guide will add the saltproject repository to the system and use the latest available version.
+
+Salt-Master installation (latest version) and enabling firewall rules (Firewall rules need to be enabled only on Master (https://docs.saltproject.io/en/latest/topics/tutorials/firewall.html)):
 ```
+# Download key
+sudo curl -fsSL -o /usr/share/keyrings/salt-archive-keyring.gpg https://repo.saltproject.io/py3/debian/11/amd64/latest/salt-archive-keyring.gpg
+# Create apt sources list file
+echo "deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch=amd64] https://repo.saltproject.io/py3/debian/11/amd64/latest bullseye main" | sudo tee /etc/apt/sources.list.d/salt.list
+$ sudo apt-get update
 $ sudo apt-get install salt-master
 $ sudo mkdir /srv/salt
 $ sudo micro /etc/ufw/applications.d/salt.ufw
-xzadminal@C0001:/srv/salt$ cat /etc/ufw/applications.d/salt.ufw 
-
+$ cat /etc/ufw/applications.d/salt.ufw 
 # File from https://github.com/saltstack/salt/blob/master/pkg/salt.ufw
 # On some operating systems this file is created automatically
 # Install into /etc/ufw/applications.d/ and run 'ufw app update salt' to add salt
@@ -147,9 +152,16 @@ Rule added (v6)
 
 ## User Workstation setup
 
-During installation phase, only the user account was created and the initial configuration was done as root. For now I will manually add the only admin user I have to the system but will later on try to automate the process.
+During installation phase, one user account was created and deleted and the initial configuration was done as root. Rest of the user account management is handled by salt-master.  
 
+Instead of using the regular apt-repository version this guide will add the saltproject repository to the system and use the latest available version.
 ```
+$ deluser disposable
+$ rm -r /home/disposable
+# Download key
+sudo curl -fsSL -o /usr/share/keyrings/salt-archive-keyring.gpg https://repo.saltproject.io/py3/debian/11/amd64/latest/salt-archive-keyring.gpg
+# Create apt sources list file
+echo "deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch=amd64] https://repo.saltproject.io/py3/debian/11/amd64/latest bullseye main" | sudo tee /etc/apt/sources.list.d/salt.list
 $ apt-get update
 $ apt-get upgrade -y
 $ apt-get install salt-minion
@@ -160,8 +172,6 @@ master: 192.168.1.5
 id: U0001
 
 $ systemctl restart salt-minion.service
-$ adduser xzadminal
-$ adduser xzadminal sudo
 $ logout
 ```
 
@@ -180,9 +190,9 @@ U0001:
 
 ## Web Server setup
 
-During installation the admin user performing the installation was created.  
+During installation one user account was created and deleted. Setup was done as root.    
 
-Initial setup follows the same path as User Workstation with the exception that one Administrator account has already been created during installation and nano (or your favorite editor) has to be manually installed before editing the files.
+Initial setup follows the same path as User Workstation wiht the exception that for Ubuntu Server 22.04 the available apt-repository version of salt-minion is already the newest (3004.1 during writing).  
 
 ## Package states
 
@@ -211,6 +221,7 @@ user-packages:
       - filezilla
       - keepassxc
       - git
+      - curl
 $ sudo salt 'U0001' state.apply user-packages
 # The output is long as so many changes happened, so here's the important parts
 Comment: 8 targeted packages were installed/updated.
@@ -247,14 +258,6 @@ webserver-packages:
 Created a state for handling ssh -connections on the Web Server and User Workstations.
 
 ### Files and Directories
-
-Explanation | Link
----|---
-Module directory: | [sshd](module/sshd/)  
-State file: | [init.sls](module/sshd/init.sls)  
-User configuration: | [user_sshd_config](module/sshd/user_sshd_config)  
-Web Server configuration: | [webserver_sshd_config](module/sshd/webserver_sshd_config)  
-Default configuration for reference: | [sshd_config_default.backup](module/sshd/sshd_config_default.backup)  
 
 ### Step-by-step
 
@@ -328,7 +331,7 @@ $ sudo salt '*' state.apply sshd
 ```
 State was run succesfully.  
 
-The Jinja code uses regex_match function to see if the minions ID extracted by grains\[id] starts with a specific letter and applies the correct configuration.  
+The regex_match function checks if the minions ID extracted by grains\[id] starts with a specific letter and applies the correct configuration.  
 
 Finally I added the sshd to the [top.sls](module/top.sls) file under base '*' because it can be run for all current minions safely.  
 
@@ -433,7 +436,7 @@ https://github.com/mozilla/policy-templates
 
 Goal is for the users to be able move files to their home directory on the webserver (S0001) utilizing SFTP (Secure File Transfer Protocol) running over SSH.  
 
-Haven't set up Filezilla before so configured one computer manually first so I chose File > Site Manager... and New Site and set the following settings:
+Haven't set up Filezilla before so configured one computer manually first so I chose File > Site Manager... and New Site and did the following settings:
 
 <img src="Screenshots/filezillaSiteManager1.png">
 
@@ -480,7 +483,7 @@ base:
     - sshd
 ```
 
-Because Filezilla's state manages files that are created for all new users, the state has to be higher than user creation (will be implented on the next stage) in the top.sls file.  
+Because Filezilla's state manages files that are created for all new users, the state has to be higher than user creation in the top.sls file.  
 
 
 ## User Management
@@ -499,10 +502,12 @@ users:
     fullname: Willy Worker
     uid: 2001
     gid: 2001
+    other: U0001
   smithjo:
     fullname: John Smith
     uid: 2002
     gid: 2002 
+    other: U0002
 $ cat /srv/pillar/users/admins.sls 
 users:
   xzadminal:
@@ -511,59 +516,62 @@ users:
     gid: 1001
     groups:
       - sudo
+    other: U0003
+$ cat /srv/pillar/users/service.sls
+users:
+  webctrl:
+    fullname: Web-Controller
+    uid: 3001
+    gid: 3001
 $ cat /srv/pillar/top.sls 
 base:
-  'S*':
+  '*':
     - users.admins
     - users.users
-  'U*':
-    - users.admins
+  'S*':
+    - users.service
 ```
 
 Next I created the actual salt state that reads from the pillar:
 ```
-$ cat /srv/salt/users/init.sls 
 {% for username, data in pillar.get('users', {}).items() %}
+
+# Create user if targets ID starts with S OR if user is in group 'sudo' OR if target computer's ID is the same as user's other field (user's computer) 
+{% if grains['id'] | regex_match('S(.*)') or 'sudo' in data.get('groups',[]) or grains['id'] == data.get('other', '') %}
 {{ username }}:
 
   group:
     - present
     - name: {{ username }}
-    - gid: {{ data.get('gid', '') }}
-    
+    - gid: {{ data.get('gid', '') }}    
   user:
     - present
+    - allow_uid_change: True
+    - allow_gid_change: True
     - fullname: {{ data.get('fullname', '') }}
     - shell: /bin/bash
     - name: {{ username }}
     - uid: {{ data.get('uid', '') }}
     - gid: {{ data.get('gid', '') }}
+    - other: {{ data.get('other', '') }}
     {% if 'groups' in data %}
     - groups:
       {% for group in data.get('groups', []) %}
       - {{ group }}
       {% endfor %} 
     {% endif %}  
+{% if grains['id'] | regex_match('S(.*)') %}
+/home/{{ username }}:
+  file.directory:
+    - mode: 751
+{% endif %}
+{% endif %}
 {% endfor %}
 ```
 
 And ran the state to all computers with `$ sudo salt '*' state.apply users`. State was run succesfully.  
 Also tested the idempotency of the state by deleting (deluser username) the admin account from U0001 and workewi from S0001. The state resolved the issue and recreated the groups and accounts.  
 
-Edited the /srv/salt/top.sls file:
-```
-$ cat /srv/salt/top.sls 
-base:
-  'U*':
-    - user-packages
-    - filezilla
-    - firefox
-  'S*':
-    - webserver-packages
-  '*':
-    - sshd
-    - users
-```
 
 ## ufw
 

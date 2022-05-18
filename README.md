@@ -16,6 +16,18 @@ https://opensource.org/licenses/gpl-2.0.php
 Current stage: 1.0   
 Install Guide/Progress Report [Here](Installation.md)
 
+Current configuration:  
+- User creation for all devices as dictated in /pillar/users/ files
+- Install default software packages for all devices
+- SSH connections on all devices
+
+- Company policies for browsers on user devices 
+- FileZilla configuration for user devices
+
+- Apache2 configuration on the webserver
+    - User pages active
+    - Default page as custom and default page location with service account webctrl (/home/webctrl/www/html/)
+
 ## Additional Information
 
 Part of Linux Configuration Management ICT4TN022-3015 course of Haaga-Helia University of Applied Sciences held by Tero Karvinen.  
