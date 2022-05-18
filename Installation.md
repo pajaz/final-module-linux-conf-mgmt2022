@@ -27,8 +27,11 @@ This document will go through the step by step guide for installation of the mod
     $ cd final-module-linux-conf-mgmt2022/
     $ sudo cp -r /module/* /srv/
     ```
-6. Run the highstate currently implemented: `sudo salt '*' state.apply`
-7. Set up passwords for you users with the [createhash](Scripts/createhash) script and try it out.
+6. Set your own IP-addresses to following:
+  - Salt-Master address to: [user_sshd_config](module/salt/sshd/user_sshd_config), [webserver_sshd_config](module/salt/sshd/webserver_sshd_config)
+  - Web-Server address to: [default-sitemanager.xml](module/salt/filezilla/default-sitemanager.xml)
+7. Run the highstate currently implemented: `sudo salt '*' state.apply`
+8. Set up passwords for you users with the [createhash](Scripts/createhash) script and try it out.
 
 Module files [Here](module/)
 

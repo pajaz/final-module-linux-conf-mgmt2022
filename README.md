@@ -28,7 +28,7 @@ Current configuration:
     - User pages active
     - Custom index and default page location in service account webctrl (/home/webctrl/www/html/)  
     
-- Provide a simple python3 script [createhash](module/Scripts/createhash) for creating password hashes and the salt command to make the actual change.  
+- Provide a simple python3 script [createhash](Scripts/createhash) for creating password hashes and the salt command to make the actual change.  
 
 ## Additional Information
 
