@@ -1,0 +1,25 @@
+#!usr/bin/python3
+import crypt
+import getpass
+
+print("Create a password hash")
+print("")
+username = input("Enter username:")
+device = input("Enter device:")
+print()
+print()
+password = getpass.getpass("New password:")
+password2 = getpass.getpass("Type password again:")
+print("")
+if password == password2:
+	hash = crypt.crypt(password, crypt.mksalt(crypt.METHOD_SHA512))
+	print('User: ' + username)
+	print('Device: ' + device)
+	print('Password hash:' + hash)
+	print()
+	print('Run the following command to change password:')
+	print()
+	print("sudo salt '" + device + "' shadow.set_password " +  username + " " + "'" +  hash + "'")
+else:
+	print("Passwords don't match")
+

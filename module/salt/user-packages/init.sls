@@ -13,3 +13,4 @@ user-packages:
       - filezilla
       - keepassxc
       - git
+      - curl

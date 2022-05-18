@@ -7,3 +7,4 @@ webserver-packages:
       - salt-minion  
       - bash-completion  
       - git
+      - curl

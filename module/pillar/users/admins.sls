@@ -5,3 +5,4 @@ users:
     gid: 1001
     groups:
       - sudo
+    other: U0003
