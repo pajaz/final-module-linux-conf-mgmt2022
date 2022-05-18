@@ -257,10 +257,6 @@ webserver-packages:
 
 Created a state for handling ssh -connections on the Web Server and User Workstations.
 
-### Files and Directories
-
-### Step-by-step
-
 I created the state directory and an .sls file that checks if openssh-server is installed and installs it if necessary:  
 ```
 $ pwd
